@@ -1,40 +1,239 @@
-<header>
-    <div class="logo">
-        Retail Recommendation Platform
-    </div>
-</header>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retail Recommendation Platform</title>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<nav>
+    <div class="logo">ShopAI</div>
+
+    <ul>
+        <li><a href="#products">Products</a></li>
+        <li><a href="#search">Search</a></li>
+        <li><a href="#recommendations">Recommendations</a></li>
+        <li><a href="#profile">Profile</a></li>
+    </ul>
+</nav>
 
 <section class="hero">
 
-    <h1>Retail Analytics Dashboard</h1>
+    <div class="hero-content">
+        <h1>Smart Retail Recommendation System</h1>
 
-    <p>
-        Product Search, User Management
-        and AI Recommendations
-    </p>
+        <p>
+            Discover products powered by AI recommendations.
+        </p>
+
+        <button onclick="loadProducts()">
+            Explore Products
+        </button>
+    </div>
 
 </section>
 
-<div class="stats">
+<section id="search" class="search-section">
 
-    <div class="stat-card">
-        <h2 id="productCount">3</h2>
-        <p>Products</p>
+    <h2>Search Products</h2>
+
+    <div class="search-bar">
+
+        <input
+            id="searchInput"
+            placeholder="Search products...">
+
+        <button onclick="searchProducts()">
+            Search
+        </button>
+
     </div>
 
-    <div class="stat-card">
-        <h2 id="userCount">1</h2>
-        <p>Users</p>
+    <div id="searchResults" class="results-grid"></div>
+
+</section>
+
+<section id="products">
+
+    <h2>Featured Products</h2>
+
+    <div id="productsGrid" class="card-grid"></div>
+
+</section>
+
+<section id="recommendations">
+
+    <h2>AI Recommendations</h2>
+
+    <div class="actions">
+
+        <button onclick="saveRecommendation()">
+            Save Recommendation
+        </button>
+
+        <button onclick="loadRecommendation()">
+            Recommended For You
+        </button>
+
     </div>
 
-    <div class="stat-card">
-        <h2>MongoDB</h2>
-        <p>Connected</p>
-    </div>
+    <div id="recommendationResults" class="card-grid"></div>
 
-    <div class="stat-card">
-        <h2>PostgreSQL</h2>
-        <p>Connected</p>
-    </div>
+</section>
 
-</div>
+<section id="profile">
+
+    <h2>User Profile</h2>
+
+    <button onclick="loadUsers()">
+        Load User
+    </button>
+
+    <div id="userCard"></div>
+
+</section>
+
+<script>
+
+async function loadProducts() {
+
+    const response =
+        await fetch("http://localhost:8002/products");
+
+    const data =
+        await response.json();
+
+    const grid =
+        document.getElementById("productsGrid");
+
+    grid.innerHTML = "";
+
+    data.forEach(product => {
+
+        grid.innerHTML += `
+        <div class="product-card">
+
+            <img src="https://picsum.photos/300?random=${product.id}">
+
+            <h3>${product.name}</h3>
+
+            <p>₹${product.price || 50000}</p>
+
+            <button>Add To Cart</button>
+
+        </div>
+        `;
+    });
+}
+
+async function loadUsers() {
+
+    const response =
+        await fetch("http://localhost:8003/users");
+
+    const users =
+        await response.json();
+
+    const user = users[0];
+
+    document.getElementById("userCard").innerHTML = `
+        <div class="user-profile">
+            <h3>${user.name}</h3>
+            <p>${user.email}</p>
+        </div>
+    `;
+}
+
+async function searchProducts() {
+
+    const q =
+        document.getElementById("searchInput").value;
+
+    const response =
+        await fetch(
+        `http://localhost:8004/search?q=${q}`
+    );
+
+    const products =
+        await response.json();
+
+    const div =
+        document.getElementById("searchResults");
+
+    div.innerHTML = "";
+
+    products.forEach(product => {
+
+        div.innerHTML += `
+        <div class="product-card">
+
+        <img src="https://picsum.photos/300?random=${product.id}">
+
+        <h3>${product.name}</h3>
+
+        <p>₹${product.price}</p>
+
+        </div>
+        `;
+
+    });
+}
+
+async function saveRecommendation() {
+
+    const response =
+        await fetch(
+            "http://localhost:8005/recommend",
+            {
+                method:"POST"
+            }
+        );
+
+    const data =
+        await response.json();
+
+    alert(data.message);
+}
+
+async function loadRecommendation() {
+
+    const response =
+        await fetch(
+            "http://localhost:8005/recommend/1"
+        );
+
+    const data =
+        await response.json();
+
+    const div =
+        document.getElementById(
+            "recommendationResults"
+        );
+
+    div.innerHTML = "";
+
+    data.recommended_products.forEach(product => {
+
+        div.innerHTML += `
+        <div class="product-card">
+
+        <img src="https://picsum.photos/300">
+
+        <h3>${product}</h3>
+
+        <p>AI Recommended</p>
+
+        </div>
+        `;
+    });
+
+}
+
+</script>
+
+</body>
+</html>
